@@ -1,7 +1,13 @@
 #pragma once
 #include "CEGUI/Texture.h"
-
+#include "Renderer.h"
 #include "Urho3D/Urho3D.h"
+#include "Urho3D/Container/Ptr.h"
+
+namespace Urho3D
+{
+	class Texture;
+}
 
 namespace CEGUI
 {
@@ -9,12 +15,12 @@ namespace CEGUI
 	{
 	public:
 		//! Set the underlying Ogre texture.
-		void setOgreTexture(Ogre::TexturePtr texture, bool take_ownership = false);
+		void setUrho3DTexture(Urho3D::SharedPtr<Urho3D::Texture> texture, bool take_ownership = false);
 		//! Return Ogre::TexturePtr for the underlying Ogre texture.
-		Ogre::TexturePtr getOgreTexture() const;
+		Urho3D::SharedPtr<Urho3D::Texture> getUrho3DTexture() const;
 
 		//! return a Ogre::string containing a unique name.
-		static Ogre::String getUniqueName();
+		static Urho3D::String getUniqueName();
 
 		// implement CEGUI::Texture interface
 		const String& getName() const;
@@ -28,10 +34,10 @@ namespace CEGUI
 		void blitToMemory(void* targetData);
 		bool isPixelFormatSupported(const PixelFormat fmt) const;
 
-		//! convert Ogre::PixelFormat to equivalent CEGUI::Texture::PixelFormat
-		static Texture::PixelFormat fromOgrePixelFormat(const Ogre::PixelFormat fmt);
-		//! convert CEGUI::Texture::PixelFormat to equivalent Ogre::PixelFormat
-		static Ogre::PixelFormat toOgrePixelFormat(const Texture::PixelFormat fmt);
+// 		//! convert Ogre::PixelFormat to equivalent CEGUI::Texture::PixelFormat
+// 		static Texture::PixelFormat fromOgrePixelFormat(const Ogre::PixelFormat fmt);
+// 		//! convert CEGUI::Texture::PixelFormat to equivalent Ogre::PixelFormat
+// 		static Ogre::PixelFormat toOgrePixelFormat(const Texture::PixelFormat fmt);
 
 	protected:
 		// we all need a little help from out friends ;)
@@ -39,8 +45,7 @@ namespace CEGUI
 		friend Texture& Urho3DRenderer::createTexture(const String&, const String&,
 			const String&);
 		friend Texture& Urho3DRenderer::createTexture(const String&, const Sizef&);
-		friend Texture& Urho3DRenderer::createTexture(const String&, Ogre::TexturePtr&,
-			bool);
+		friend Texture& Urho3DRenderer::createTexture(const String&, Urho3D::SharedPtr<Urho3D::Texture>&, bool);
 		friend void Urho3DRenderer::destroyTexture(Texture&);
 		friend void Urho3DRenderer::destroyTexture(const String&);
 
@@ -52,7 +57,7 @@ namespace CEGUI
 		//! construct texture with a specified initial size.
 		Urho3DTexture(const String& name, const Sizef& sz);
 		//! construct texture from existing Ogre texture.
-		Urho3DTexture(const String& name, Ogre::TexturePtr& tex, bool take_ownership);
+		Urho3DTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture>& tex, bool take_ownership);
 
 
 		//! destructor.
@@ -67,7 +72,7 @@ namespace CEGUI
 		//! Counter used to provide unique texture names.
 		static std::uint32_t d_textureNumber;
 		//!< The underlying Ogre texture.
-		Ogre::TexturePtr d_texture;
+		Urho3D::SharedPtr<Urho3D::Texture> d_texture;
 		//! specifies whether d_texture was created externally (not owned by us).
 		bool d_isLinked;
 		//! Size of the texture.

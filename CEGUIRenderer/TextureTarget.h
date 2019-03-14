@@ -1,15 +1,22 @@
 #pragma once
 #include "CEGUI/TextureTarget.h"
-
+#include "RenderTarget.h"
 #include "Urho3D/Urho3D.h"
+
+namespace Urho3D
+{
+	class Renderer;
+}
 
 namespace CEGUI
 {
+	class Urho3DRenderer;
+	class Urho3DTexture;
 	class URHO3D_API Urho3DTextureTarget : public Urho3DRenderTarget, public TextureTarget
 	{
 	public:
 		//! Constructor.
-		Urho3DTextureTarget(Urho3DRenderer& owner, Ogre::RenderSystem& rs, bool addStencilBuffer);
+		Urho3DTextureTarget(Urho3DRenderer& owner, Urho3D::Renderer& rs, bool addStencilBuffer);
 		//! Destructor.
 		virtual ~Urho3DTextureTarget();
 

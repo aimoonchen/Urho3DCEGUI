@@ -3,6 +3,9 @@
 #include "CEGUI/System.h"
 #include "ImageCodec.h"
 
+#include "Urho3D/Container/Str.h"
+#include "Urho3D/Graphics/Texture.h"
+
 #include <cstdint>
 
 namespace CEGUI
@@ -73,24 +76,24 @@ namespace CEGUI
 		d_texelScaling(0, 0),
 		d_name(name)
 	{
-		d_texture = Ogre::TextureManager::getSingleton().createManual(
-			getUniqueName(), "General", Ogre::TEX_TYPE_2D,
-			sz.d_width, sz.d_height, 0,
-			Ogre::PF_A8B8G8R8);
-
-		// throw exception if no texture was able to be created
-		if (d_texture.isNull())
-			throw RendererException(
-				"Failed to create Texture object with spcecified size.");
-
-		d_size.d_width = static_cast<float>(d_texture->getWidth());
-		d_size.d_height = static_cast<float>(d_texture->getHeight());
-		d_dataSize = sz;
-		updateCachedScaleValues();
+// 		d_texture = Ogre::TextureManager::getSingleton().createManual(
+// 			getUniqueName(), "General", Ogre::TEX_TYPE_2D,
+// 			sz.d_width, sz.d_height, 0,
+// 			Ogre::PF_A8B8G8R8);
+// 
+// 		// throw exception if no texture was able to be created
+// 		if (d_texture.isNull())
+// 			throw RendererException(
+// 				"Failed to create Texture object with spcecified size.");
+// 
+// 		d_size.d_width = static_cast<float>(d_texture->getWidth());
+// 		d_size.d_height = static_cast<float>(d_texture->getHeight());
+// 		d_dataSize = sz;
+// 		updateCachedScaleValues();
 	}
 
 	//----------------------------------------------------------------------------//
-	Urho3DTexture::Urho3DTexture(const String& name, Ogre::TexturePtr& tex,
+	Urho3DTexture::Urho3DTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture>& tex,
 		bool take_ownership) :
 		d_isLinked(false),
 		d_size(0, 0),
@@ -98,7 +101,7 @@ namespace CEGUI
 		d_texelScaling(0, 0),
 		d_name(name)
 	{
-		setOgreTexture(tex, take_ownership);
+		setUrho3DTexture(tex, take_ownership);
 	}
 
 	//----------------------------------------------------------------------------//
@@ -155,7 +158,7 @@ namespace CEGUI
 			String::size_type i = filename.find_last_of(".");
 			if (i != String::npos && filename.length() - i > 1)
 				type = filename.substr(i + 1);
-			static_cast<OgreImageCodec&>(ic).setImageFileDataType(type);
+			static_cast<Urho3DImageCodec&>(ic).setImageFileDataType(type);
 		}
 
 		Texture* res = sys->getImageCodec().load(texFile, this);
@@ -174,110 +177,113 @@ namespace CEGUI
 	void Urho3DTexture::loadFromMemory(const void* buffer, const Sizef& buffer_size,
 		PixelFormat pixel_format)
 	{
-		using namespace Ogre;
-
-		if (!isPixelFormatSupported(pixel_format))
-			throw InvalidRequestException(
-				"Data was supplied in an unsupported pixel format.");
-
-		const size_t byte_size = calculateDataSize(buffer_size, pixel_format);
-
-		char* bufferCopy = new char[byte_size];
-		memcpy(bufferCopy, buffer, byte_size);
-
-		const Ogre::PixelBox* pixelBox = new Ogre::PixelBox(static_cast<std::uint32_t>(buffer_size.d_width), static_cast<std::uint32_t>(buffer_size.d_height),
-			1, toOgrePixelFormat(pixel_format), bufferCopy);
-		createEmptyOgreTexture(pixel_format);
-		d_texture->freeInternalResources();
-		d_texture->setWidth(static_cast<std::uint32_t>(buffer_size.d_width));
-		d_texture->setHeight(static_cast<std::uint32_t>(buffer_size.d_height));
-		d_texture->setDepth(1);
-		d_texture->createInternalResources();
-		d_texture->getBuffer(0, 0).get()->blitFromMemory(*pixelBox);
-
-		// throw exception if no texture was able to be created
-		if (d_texture.isNull())
-			throw RendererException(
-				"Failed to blit to Texture from memory.");
-
-		d_size.d_width = static_cast<float>(d_texture->getWidth());
-		d_size.d_height = static_cast<float>(d_texture->getHeight());
-		d_dataSize = buffer_size;
-		updateCachedScaleValues();
+// 		using namespace Urho3D;
+// 
+// 		if (!isPixelFormatSupported(pixel_format))
+// 			throw InvalidRequestException(
+// 				"Data was supplied in an unsupported pixel format.");
+// 
+// 		const size_t byte_size = calculateDataSize(buffer_size, pixel_format);
+// 
+// 		char* bufferCopy = new char[byte_size];
+// 		memcpy(bufferCopy, buffer, byte_size);
+// 
+// 		const Ogre::PixelBox* pixelBox = new Ogre::PixelBox(static_cast<std::uint32_t>(buffer_size.d_width), static_cast<std::uint32_t>(buffer_size.d_height),
+// 			1, toOgrePixelFormat(pixel_format), bufferCopy);
+// 		createEmptyOgreTexture(pixel_format);
+// 		d_texture->freeInternalResources();
+// 		d_texture->setWidth(static_cast<std::uint32_t>(buffer_size.d_width));
+// 		d_texture->setHeight(static_cast<std::uint32_t>(buffer_size.d_height));
+// 		d_texture->setDepth(1);
+// 		d_texture->createInternalResources();
+// 		d_texture->getBuffer(0, 0).get()->blitFromMemory(*pixelBox);
+// 
+// 		// throw exception if no texture was able to be created
+// 		if (d_texture.isNull())
+// 			throw RendererException(
+// 				"Failed to blit to Texture from memory.");
+// 
+// 		d_size.d_width = static_cast<float>(d_texture->getWidth());
+// 		d_size.d_height = static_cast<float>(d_texture->getHeight());
+// 		d_dataSize = buffer_size;
+// 		updateCachedScaleValues();
 	}
 
 	//----------------------------------------------------------------------------//
 	void Urho3DTexture::blitFromMemory(const void* sourceData, const Rectf& area)
 	{
-		if (d_texture.isNull()) // TODO: exception?
-			return;
-
-		// Ogre doesn't like null data, so skip if the sourceData is null and
-		// area is zero size
-		if (sourceData == nullptr)
-		{
-			if (static_cast<int>(area.getWidth()) == 0 &&
-				static_cast<int>(area.getHeight()) == 0)
-			{
-				return;
-			}
-
-			// Here we are trying to write to a non-zero size area with null
-			// ptr for data
-			throw RendererException("blitFromMemory source is null");
-		}
-
-
-		// NOTE: const_cast because Ogre takes pointer to non-const here. Rather
-		// than allow that to dictate poor choices in our own APIs, we choose to
-		// address the issue as close to the source of the problem as possible.
-		Ogre::PixelBox pb(static_cast<Ogre::uint32>(area.getWidth()),
-			static_cast<Ogre::uint32>(area.getHeight()),
-			1,
-			d_texture->getFormat(), const_cast<void*>(sourceData));
-
-		Ogre::Image::Box box(static_cast<Ogre::uint32>(area.left()),
-			static_cast<Ogre::uint32>(area.top()),
-			static_cast<Ogre::uint32>(area.right()),
-			static_cast<Ogre::uint32>(area.bottom()));
-		d_texture->getBuffer()->blitFromMemory(pb, box);
+// 		if (d_texture.isNull()) // TODO: exception?
+// 			return;
+// 
+// 		// Ogre doesn't like null data, so skip if the sourceData is null and
+// 		// area is zero size
+// 		if (sourceData == nullptr)
+// 		{
+// 			if (static_cast<int>(area.getWidth()) == 0 &&
+// 				static_cast<int>(area.getHeight()) == 0)
+// 			{
+// 				return;
+// 			}
+// 
+// 			// Here we are trying to write to a non-zero size area with null
+// 			// ptr for data
+// 			throw RendererException("blitFromMemory source is null");
+// 		}
+// 
+// 
+// 		// NOTE: const_cast because Ogre takes pointer to non-const here. Rather
+// 		// than allow that to dictate poor choices in our own APIs, we choose to
+// 		// address the issue as close to the source of the problem as possible.
+// 		Ogre::PixelBox pb(static_cast<Ogre::uint32>(area.getWidth()),
+// 			static_cast<Ogre::uint32>(area.getHeight()),
+// 			1,
+// 			d_texture->getFormat(), const_cast<void*>(sourceData));
+// 
+// 		Ogre::Image::Box box(static_cast<Ogre::uint32>(area.left()),
+// 			static_cast<Ogre::uint32>(area.top()),
+// 			static_cast<Ogre::uint32>(area.right()),
+// 			static_cast<Ogre::uint32>(area.bottom()));
+// 		d_texture->getBuffer()->blitFromMemory(pb, box);
 	}
 
 	//----------------------------------------------------------------------------//
 	void Urho3DTexture::blitToMemory(void* targetData)
 	{
-		if (d_texture.isNull()) // TODO: exception?
-			return;
-
-		Ogre::PixelBox pb(static_cast<std::uint32_t>(d_size.d_width), static_cast<std::uint32_t>(d_size.d_height),
-			1, d_texture->getFormat(), targetData);
-		d_texture->getBuffer()->blitToMemory(pb);
+// 		if (d_texture.isNull()) // TODO: exception?
+// 			return;
+// 
+// 		Ogre::PixelBox pb(static_cast<std::uint32_t>(d_size.d_width), static_cast<std::uint32_t>(d_size.d_height),
+// 			1, d_texture->getFormat(), targetData);
+// 		d_texture->getBuffer()->blitToMemory(pb);
 	}
 
 	//----------------------------------------------------------------------------//
 	void Urho3DTexture::freeOgreTexture()
 	{
-		if (!d_texture.isNull() && !d_isLinked)
-			Ogre::TextureManager::getSingleton().remove(d_texture->getHandle());
-
-		d_texture.setNull();
+// 		if (!d_texture.isNull() && !d_isLinked)
+// 			Ogre::TextureManager::getSingleton().remove(d_texture->getHandle());
+// 
+// 		d_texture.setNull();
 	}
 
 	//----------------------------------------------------------------------------//
-	Ogre::String Urho3DTexture::getUniqueName()
+	Urho3D::String Urho3DTexture::getUniqueName()
 	{
-#if OGRE_VERSION < 0x10A00
-		Ogre::StringUtil::StrStreamType strstream;
-		strstream << "_cegui_ogre_" << d_textureNumber++;
-
-		return strstream.str();
-#endif
-#if OGRE_VERSION >= 0x10A00
-		Ogre::StringStream strstream;
-		strstream << "_cegui_ogre_" << d_textureNumber++;
-
-		return strstream.str();
-#endif   
+// #if OGRE_VERSION < 0x10A00
+// 		Ogre::StringUtil::StrStreamType strstream;
+// 		strstream << "_cegui_ogre_" << d_textureNumber++;
+// 
+// 		return strstream.str();
+// #endif
+// #if OGRE_VERSION >= 0x10A00
+// 		Ogre::StringStream strstream;
+// 		strstream << "_cegui_ogre_" << d_textureNumber++;
+// 
+// 		return strstream.str();
+// #endif   
+		Urho3D::String name;
+		name.AppendWithFormat("_cegui_ogre_%d", d_textureNumber++);
+		return name;
 	}
 
 	//----------------------------------------------------------------------------//
@@ -309,27 +315,27 @@ namespace CEGUI
 	}
 
 	//----------------------------------------------------------------------------//
-	void Urho3DTexture::setOgreTexture(Ogre::TexturePtr texture, bool take_ownership)
+	void Urho3DTexture::setUrho3DTexture(Urho3D::SharedPtr<Urho3D::Texture> texture, bool take_ownership)
 	{
-		freeOgreTexture();
-
-		d_texture = texture;
-		d_isLinked = !take_ownership;
-
-		if (!d_texture.isNull())
-		{
-			d_size.d_width = static_cast<float>(d_texture->getWidth());
-			d_size.d_height = static_cast<float>(d_texture->getHeight());
-			d_dataSize = d_size;
-		}
-		else
-			d_size = d_dataSize = Sizef(0, 0);
-
-		updateCachedScaleValues();
+// 		freeOgreTexture();
+// 
+// 		d_texture = texture;
+// 		d_isLinked = !take_ownership;
+// 
+// 		if (!d_texture.isNull())
+// 		{
+// 			d_size.d_width = static_cast<float>(d_texture->getWidth());
+// 			d_size.d_height = static_cast<float>(d_texture->getHeight());
+// 			d_dataSize = d_size;
+// 		}
+// 		else
+// 			d_size = d_dataSize = Sizef(0, 0);
+// 
+// 		updateCachedScaleValues();
 	}
 
 	//----------------------------------------------------------------------------//
-	Ogre::TexturePtr Urho3DTexture::getOgreTexture() const
+	Urho3D::SharedPtr<Urho3D::Texture> Urho3DTexture::getUrho3DTexture() const
 	{
 		return d_texture;
 	}
@@ -337,71 +343,72 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	bool Urho3DTexture::isPixelFormatSupported(const PixelFormat fmt) const
 	{
-		try
-		{
-			return Ogre::TextureManager::getSingleton().
-				isEquivalentFormatSupported(Ogre::TEX_TYPE_2D,
-					toOgrePixelFormat(fmt),
-					Ogre::TU_DEFAULT);
-		}
-		catch (InvalidRequestException&)
-		{
-			return false;
-		}
+		return false;
+// 		try
+// 		{
+// 			return Ogre::TextureManager::getSingleton().
+// 				isEquivalentFormatSupported(Ogre::TEX_TYPE_2D,
+// 					toOgrePixelFormat(fmt),
+// 					Ogre::TU_DEFAULT);
+// 		}
+// 		catch (InvalidRequestException&)
+// 		{
+// 			return false;
+// 		}
 	}
 
-	//----------------------------------------------------------------------------//
-	Ogre::PixelFormat Urho3DTexture::toOgrePixelFormat(const Texture::PixelFormat fmt)
-	{
-		switch (fmt)
-		{
-		case Texture::PixelFormat::Rgba:       return Ogre::PF_A8B8G8R8;
-		case Texture::PixelFormat::Rgb:        return Ogre::PF_B8G8R8;
-		case Texture::PixelFormat::Rgb565:    return Ogre::PF_R5G6B5;
-		case Texture::PixelFormat::Rgba4444:  return Ogre::PF_A4R4G4B4;
-		case Texture::PixelFormat::Pvrtc2:     return Ogre::PF_PVRTC_RGBA2;
-		case Texture::PixelFormat::Pvrtc4:     return Ogre::PF_PVRTC_RGBA4;
-		case Texture::PixelFormat::RgbaDxt1:  return Ogre::PF_DXT1;
-		case Texture::PixelFormat::RgbaDxt3:  return Ogre::PF_DXT3;
-		case Texture::PixelFormat::RgbaDxt5:  return Ogre::PF_DXT5;
-
-		default:
-			throw InvalidRequestException(
-				"Invalid pixel format translation.");
-		}
-	}
-
-	//----------------------------------------------------------------------------//
-	Texture::PixelFormat Urho3DTexture::fromOgrePixelFormat(
-		const Ogre::PixelFormat fmt)
-	{
-		switch (fmt)
-		{
-		case Ogre::PF_A8R8G8B8:     return Texture::PixelFormat::Rgba;
-		case Ogre::PF_A8B8G8R8:     return Texture::PixelFormat::Rgba;
-		case Ogre::PF_R8G8B8:       return Texture::PixelFormat::Rgb;
-		case Ogre::PF_B8G8R8:       return Texture::PixelFormat::Rgb;
-		case Ogre::PF_R5G6B5:       return Texture::PixelFormat::Rgb565;
-		case Ogre::PF_A4R4G4B4:     return Texture::PixelFormat::Rgba4444;
-		case Ogre::PF_PVRTC_RGBA2:  return Texture::PixelFormat::Pvrtc2;
-		case Ogre::PF_PVRTC_RGBA4:  return Texture::PixelFormat::Pvrtc4;
-		case Ogre::PF_DXT1:         return Texture::PixelFormat::RgbaDxt1;
-		case Ogre::PF_DXT3:         return Texture::PixelFormat::RgbaDxt3;
-		case Ogre::PF_DXT5:         return Texture::PixelFormat::RgbaDxt5;
-
-		default:
-			throw InvalidRequestException(
-				"Invalid pixel format translation.");
-		}
-	}
+// 	//----------------------------------------------------------------------------//
+// 	Ogre::PixelFormat Urho3DTexture::toOgrePixelFormat(const Texture::PixelFormat fmt)
+// 	{
+// 		switch (fmt)
+// 		{
+// 		case Texture::PixelFormat::Rgba:       return Ogre::PF_A8B8G8R8;
+// 		case Texture::PixelFormat::Rgb:        return Ogre::PF_B8G8R8;
+// 		case Texture::PixelFormat::Rgb565:    return Ogre::PF_R5G6B5;
+// 		case Texture::PixelFormat::Rgba4444:  return Ogre::PF_A4R4G4B4;
+// 		case Texture::PixelFormat::Pvrtc2:     return Ogre::PF_PVRTC_RGBA2;
+// 		case Texture::PixelFormat::Pvrtc4:     return Ogre::PF_PVRTC_RGBA4;
+// 		case Texture::PixelFormat::RgbaDxt1:  return Ogre::PF_DXT1;
+// 		case Texture::PixelFormat::RgbaDxt3:  return Ogre::PF_DXT3;
+// 		case Texture::PixelFormat::RgbaDxt5:  return Ogre::PF_DXT5;
+// 
+// 		default:
+// 			throw InvalidRequestException(
+// 				"Invalid pixel format translation.");
+// 		}
+// 	}
+// 
+// 	//----------------------------------------------------------------------------//
+// 	Texture::PixelFormat Urho3DTexture::fromOgrePixelFormat(
+// 		const Ogre::PixelFormat fmt)
+// 	{
+// 		switch (fmt)
+// 		{
+// 		case Ogre::PF_A8R8G8B8:     return Texture::PixelFormat::Rgba;
+// 		case Ogre::PF_A8B8G8R8:     return Texture::PixelFormat::Rgba;
+// 		case Ogre::PF_R8G8B8:       return Texture::PixelFormat::Rgb;
+// 		case Ogre::PF_B8G8R8:       return Texture::PixelFormat::Rgb;
+// 		case Ogre::PF_R5G6B5:       return Texture::PixelFormat::Rgb565;
+// 		case Ogre::PF_A4R4G4B4:     return Texture::PixelFormat::Rgba4444;
+// 		case Ogre::PF_PVRTC_RGBA2:  return Texture::PixelFormat::Pvrtc2;
+// 		case Ogre::PF_PVRTC_RGBA4:  return Texture::PixelFormat::Pvrtc4;
+// 		case Ogre::PF_DXT1:         return Texture::PixelFormat::RgbaDxt1;
+// 		case Ogre::PF_DXT3:         return Texture::PixelFormat::RgbaDxt3;
+// 		case Ogre::PF_DXT5:         return Texture::PixelFormat::RgbaDxt5;
+// 
+// 		default:
+// 			throw InvalidRequestException(
+// 				"Invalid pixel format translation.");
+// 		}
+// 	}
 
 	//----------------------------------------------------------------------------//
 	void Urho3DTexture::createEmptyOgreTexture(PixelFormat pixel_format)
 	{
 		// try to create a Ogre::Texture with given dimensions
-		d_texture = Ogre::TextureManager::getSingleton().createManual(
-			getUniqueName(), "General", Ogre::TEX_TYPE_2D,
-			1, 1, 0,
-			toOgrePixelFormat(pixel_format));
+// 		d_texture = Ogre::TextureManager::getSingleton().createManual(
+// 			getUniqueName(), "General", Ogre::TEX_TYPE_2D,
+// 			1, 1, 0,
+// 			toOgrePixelFormat(pixel_format));
 	}
 }

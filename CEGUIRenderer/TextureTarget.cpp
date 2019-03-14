@@ -9,7 +9,7 @@ namespace CEGUI
 
 	//----------------------------------------------------------------------------//
 	Urho3DTextureTarget::Urho3DTextureTarget(Urho3DRenderer& owner,
-		Ogre::RenderSystem& rs,
+		Urho3D::Renderer& rs,
 		bool addStencilBuffer) :
 		Urho3DRenderTarget(owner, rs),
 		TextureTarget(addStencilBuffer),
@@ -37,21 +37,21 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DTextureTarget::clear()
 	{
-		if (!d_viewportValid)
-			updateViewport();
-
-		Ogre::Viewport* const saved_vp = d_renderSystem._getViewport();
-
-		d_renderSystem._setViewport(d_viewport);
-		d_renderSystem.clearFrameBuffer(Ogre::FBT_COLOUR,
-			Ogre::ColourValue(0, 0, 0, 0));
-
-#if OGRE_VERSION < 0x10800
-		if (saved_vp)
-			d_renderSystem._setViewport(saved_vp);
-#else
-		d_renderSystem._setViewport(saved_vp);
-#endif
+// 		if (!d_viewportValid)
+// 			updateViewport();
+// 
+// 		Ogre::Viewport* const saved_vp = d_renderSystem._getViewport();
+// 
+// 		d_renderSystem._setViewport(d_viewport);
+// 		d_renderSystem.clearFrameBuffer(Ogre::FBT_COLOUR,
+// 			Ogre::ColourValue(0, 0, 0, 0));
+// 
+// #if OGRE_VERSION < 0x10800
+// 		if (saved_vp)
+// 			d_renderSystem._setViewport(saved_vp);
+// #else
+// 		d_renderSystem._setViewport(saved_vp);
+// #endif
 	}
 
 	//----------------------------------------------------------------------------//
@@ -63,42 +63,42 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DTextureTarget::declareRenderSize(const Sizef& sz)
 	{
-		// exit if current size is enough
-		if ((d_area.getWidth() >= sz.d_width) && (d_area.getHeight() >= sz.d_height))
-			return;
-
-		Ogre::TexturePtr rttTex = Ogre::TextureManager::getSingleton().createManual(Urho3DTexture::getUniqueName(),
-			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-			Ogre::TEX_TYPE_2D,
-			static_cast<Ogre::uint>(sz.d_width),
-			static_cast<Ogre::uint>(sz.d_height),
-			1,
-			0,
-			Ogre::PF_A8R8G8B8,
-			Ogre::TU_RENDERTARGET);
-
-		d_renderTarget = rttTex->getBuffer()->getRenderTarget();
-
-		const Rectf init_area(
-			glm::vec2(0.0f, 0.0f),
-			Sizef(
-				static_cast<float>(d_renderTarget->getWidth()),
-				static_cast<float>(d_renderTarget->getHeight())
-			)
-		);
-
-		setArea(init_area);
-
-		// delete viewport and reset ptr so a new one is generated.  This is
-		// required because we have changed d_renderTarget so need a new VP also.
-		OGRE_DELETE d_viewport;
-		d_viewport = 0;
-
-		// because Texture takes ownership, the act of setting the new ogre texture
-		// also ensures any previous ogre texture is released.
-		d_CEGUITexture->setOgreTexture(rttTex, true);
-
-		clear();
+// 		// exit if current size is enough
+// 		if ((d_area.getWidth() >= sz.d_width) && (d_area.getHeight() >= sz.d_height))
+// 			return;
+// 
+// 		Ogre::TexturePtr rttTex = Ogre::TextureManager::getSingleton().createManual(Urho3DTexture::getUniqueName(),
+// 			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+// 			Ogre::TEX_TYPE_2D,
+// 			static_cast<Ogre::uint>(sz.d_width),
+// 			static_cast<Ogre::uint>(sz.d_height),
+// 			1,
+// 			0,
+// 			Ogre::PF_A8R8G8B8,
+// 			Ogre::TU_RENDERTARGET);
+// 
+// 		d_renderTarget = rttTex->getBuffer()->getRenderTarget();
+// 
+// 		const Rectf init_area(
+// 			glm::vec2(0.0f, 0.0f),
+// 			Sizef(
+// 				static_cast<float>(d_renderTarget->getWidth()),
+// 				static_cast<float>(d_renderTarget->getHeight())
+// 			)
+// 		);
+// 
+// 		setArea(init_area);
+// 
+// 		// delete viewport and reset ptr so a new one is generated.  This is
+// 		// required because we have changed d_renderTarget so need a new VP also.
+// 		OGRE_DELETE d_viewport;
+// 		d_viewport = 0;
+// 
+// 		// because Texture takes ownership, the act of setting the new ogre texture
+// 		// also ensures any previous ogre texture is released.
+// 		d_CEGUITexture->setOgreTexture(rttTex, true);
+// 
+// 		clear();
 	}
 
 	//----------------------------------------------------------------------------//

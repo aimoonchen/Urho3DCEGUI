@@ -4,12 +4,15 @@
 #include "CEGUI/Config.h"
 
 #include "Urho3D/Urho3D.h"
+#include "Urho3D/Container/Ptr.h"
 
 namespace Urho3D
 {
 	class RenderSurface;
 	class Matrix4;
+	class Texture;
 }
+
 namespace CEGUI
 {
 	class Urho3DGeometryBuffer;
@@ -39,11 +42,14 @@ namespace CEGUI
 		static glm::mat4 urho3DToGlmMatrix(const Urho3D::Matrix4& matrix);
 		static Urho3D::Matrix4 glmToUrho3DMatrix(const glm::mat4& matrix);
 
-		Texture& createTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture>& tex, bool take_ownership = false);
-		void setupRenderingBlendMode(const BlendMode mode, bool force = false);
+		void setRenderingEnabled(const bool enabled);
+		bool isRenderingEnabled() const;
+
+		void clearVertexBufferPool();
 
 		// implement Renderer interface
 		RenderTarget& getDefaultRenderTarget() override;
+		RefCounted<RenderMaterial> createRenderMaterial(const DefaultShaderType shaderType) const override;
 		GeometryBuffer& createGeometryBufferTextured(CEGUI::RefCounted<RenderMaterial> renderMaterial) override;
 		GeometryBuffer& createGeometryBufferColoured(CEGUI::RefCounted<RenderMaterial> renderMaterial) override;
 		TextureTarget* createTextureTarget(bool addStencilBuffer) override;
@@ -52,6 +58,7 @@ namespace CEGUI
 		Texture& createTexture(const String& name) override;
 		Texture& createTexture(const String& name, const String& filename, const String& resourceGroup) override;
 		Texture& createTexture(const String& name, const Sizef& size) override;
+		Texture& createTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture>& tex, bool take_ownership = false);
 		void destroyTexture(Texture& texture) override;
 		void destroyTexture(const String& name) override;
 		void destroyAllTextures() override;
@@ -65,8 +72,20 @@ namespace CEGUI
 		//
 		void beginRendering() override;
 		void endRendering() override;
-		RefCounted<RenderMaterial> createRenderMaterial(const DefaultShaderType shaderType) const override;
+		void setupRenderingBlendMode(const BlendMode mode, bool force = false);
 	protected:
+		Urho3DRenderer();
+		//! constructor takin the Ogre::RenderTarget to use as the default root.
+		Urho3DRenderer(Urho3D::RenderSurface& target);
+		//! destructor.
+		virtual ~Urho3DRenderer();
+		void checkOgreInitialised();
+		void throwIfNameExists(const String& name) const;
+		static void logTextureCreation(const String& name);
+		static void logTextureDestruction(const String& name);
+		void constructor_impl(Urho3D::RenderSurface& target);
+		void initialiseShaders();
+		void cleanupShaders();
 		Urho3DRenderer_impl* d_pimpl;
 	};
 }

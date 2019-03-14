@@ -5,11 +5,22 @@
 
 namespace CEGUI
 {
-	Urho3DGeometryBuffer(Urho3D::Renderer& owner, CEGUI::RefCounted<RenderMaterial> renderMaterial);
-	virtual ~Urho3DGeometryBuffer()
+	Urho3DGeometryBuffer::Urho3DGeometryBuffer(Urho3DRenderer& owner,
+		Urho3D::Renderer& rs, CEGUI::RefCounted<RenderMaterial> renderMaterial) :
+		GeometryBuffer(renderMaterial),
+		d_owner(owner),
+		d_renderSystem(rs),
+		d_matrix(1.0)
 	{
 
 	}
+
+	//----------------------------------------------------------------------------//
+	Urho3DGeometryBuffer::~Urho3DGeometryBuffer()
+	{
+		//cleanUpVertexAttributes();
+	}
+
 	void Urho3DGeometryBuffer::draw() const
 	{
 
@@ -25,7 +36,12 @@ namespace CEGUI
 
 	}
 
-	void Urho3DGeometryBuffer::finaliseVertexAttributes()
+	void Urho3DGeometryBuffer::finaliseVertexAttributes(MANUALOBJECT_TYPE type)
+	{
+
+	}
+
+	void Urho3DGeometryBuffer::updateMatrix() const
 	{
 
 	}
