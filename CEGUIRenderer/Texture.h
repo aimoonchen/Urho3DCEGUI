@@ -6,7 +6,7 @@
 
 namespace Urho3D
 {
-	class Texture;
+	class Texture2D;
 }
 
 namespace CEGUI
@@ -34,16 +34,15 @@ namespace CEGUI
 		void blitToMemory(void* targetData);
 		bool isPixelFormatSupported(const PixelFormat fmt) const;
 
-// 		//! convert Ogre::PixelFormat to equivalent CEGUI::Texture::PixelFormat
-// 		static Texture::PixelFormat fromOgrePixelFormat(const Ogre::PixelFormat fmt);
-// 		//! convert CEGUI::Texture::PixelFormat to equivalent Ogre::PixelFormat
-// 		static Ogre::PixelFormat toOgrePixelFormat(const Texture::PixelFormat fmt);
+		//! convert Ogre::PixelFormat to equivalent CEGUI::Texture::PixelFormat
+		static Texture::PixelFormat fromUrho3DPixelFormat(const unsigned fmt);
+		//! convert CEGUI::Texture::PixelFormat to equivalent Ogre::PixelFormat
+		static unsigned toUrho3DPixelFormat(const Texture::PixelFormat fmt);
 
 	protected:
 		// we all need a little help from out friends ;)
 		friend Texture& Urho3DRenderer::createTexture(const String&);
-		friend Texture& Urho3DRenderer::createTexture(const String&, const String&,
-			const String&);
+		friend Texture& Urho3DRenderer::createTexture(const String&, const String&, const String&);
 		friend Texture& Urho3DRenderer::createTexture(const String&, const Sizef&);
 		friend Texture& Urho3DRenderer::createTexture(const String&, Urho3D::SharedPtr<Urho3D::Texture>&, bool);
 		friend void Urho3DRenderer::destroyTexture(Texture&);
@@ -63,16 +62,16 @@ namespace CEGUI
 		//! destructor.
 		virtual ~Urho3DTexture();
 		//! construct an empty texture
-		void createEmptyOgreTexture(PixelFormat pixel_format);
-		//! release the underlying Ogre texture.
-		void freeOgreTexture();
+		void createEmptyUrho3DTexture(PixelFormat pixel_format);
+		//! release the underlying Urho3D texture.
+		void freeUrho3DTexture();
 		//! updates cached scale value used to map pixels to texture co-ords.
 		void updateCachedScaleValues();
 
 		//! Counter used to provide unique texture names.
 		static std::uint32_t d_textureNumber;
 		//!< The underlying Ogre texture.
-		Urho3D::SharedPtr<Urho3D::Texture> d_texture;
+		Urho3D::SharedPtr<Urho3D::Texture2D> d_texture;
 		//! specifies whether d_texture was created externally (not owned by us).
 		bool d_isLinked;
 		//! Size of the texture.

@@ -2,7 +2,7 @@
 
 namespace CEGUI
 {
-	Urho3DShaderWrapper::Urho3DShaderWrapper(Urho3DRenderer& owner, Urho3D::Renderer& rs,
+	Urho3DShaderWrapper::Urho3DShaderWrapper(Urho3DRenderer& owner, Urho3D::Graphics& rs,
 		Urho3D::SharedPtr<Urho3D::ShaderVariation> vs, Urho3D::SharedPtr<Urho3D::ShaderVariation> ps)
 	{
 

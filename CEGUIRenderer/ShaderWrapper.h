@@ -20,7 +20,7 @@ namespace CEGUI
 	class URHO3D_API Urho3DShaderWrapper : public ShaderWrapper
 	{
 	public:
-		Urho3DShaderWrapper(Urho3DRenderer& owner, Urho3D::Renderer& rs, Urho3D::SharedPtr<Urho3D::ShaderVariation> vs, Urho3D::SharedPtr<Urho3D::ShaderVariation> ps);
+		Urho3DShaderWrapper(Urho3DRenderer& owner, Urho3D::Graphics& rs, Urho3D::SharedPtr<Urho3D::ShaderVariation> vs, Urho3D::SharedPtr<Urho3D::ShaderVariation> ps);
 		~Urho3DShaderWrapper();
 		void prepareForRendering(const ShaderParameterBindings* shaderParameterBindings) override;
 	};

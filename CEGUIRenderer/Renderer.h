@@ -11,6 +11,7 @@ namespace Urho3D
 	class RenderSurface;
 	class Matrix4;
 	class Texture;
+	class Graphics;
 }
 
 namespace CEGUI
@@ -25,12 +26,12 @@ namespace CEGUI
 	class URHO3D_API Urho3DRenderer : public Renderer
 	{
 	public:
-		static Urho3DRenderer& bootstrapSystem(const int abi = CEGUI_VERSION_ABI);
-		static Urho3DRenderer& bootstrapSystem(Urho3D::RenderSurface& target, const int abi = CEGUI_VERSION_ABI);
+		static Urho3DRenderer& bootstrapSystem(Urho3D::Graphics* graphics, const int abi = CEGUI_VERSION_ABI);
+		static Urho3DRenderer& bootstrapSystem(Urho3D::Graphics* graphics, Urho3D::RenderSurface& target, const int abi = CEGUI_VERSION_ABI);
 		static void destroySystem();
 
-		static Urho3DRenderer& create(const int abi = CEGUI_VERSION_ABI);
-		static Urho3DRenderer& create(Urho3D::RenderSurface& target, const int abi = CEGUI_VERSION_ABI);
+		static Urho3DRenderer& create(Urho3D::Graphics* graphics, const int abi = CEGUI_VERSION_ABI);
+		static Urho3DRenderer& create(Urho3D::Graphics* graphics, Urho3D::RenderSurface& target, const int abi = CEGUI_VERSION_ABI);
 		static void destroy(Urho3DRenderer& renderer);
 
 		static Urho3DResourceProvider& createUrho3DResourceProvider();
@@ -74,9 +75,9 @@ namespace CEGUI
 		void endRendering() override;
 		void setupRenderingBlendMode(const BlendMode mode, bool force = false);
 	protected:
-		Urho3DRenderer();
+		Urho3DRenderer(Urho3D::Graphics* graphics);
 		//! constructor takin the Ogre::RenderTarget to use as the default root.
-		Urho3DRenderer(Urho3D::RenderSurface& target);
+		Urho3DRenderer(Urho3D::Graphics* graphics, Urho3D::RenderSurface& target);
 		//! destructor.
 		virtual ~Urho3DRenderer();
 		void checkOgreInitialised();
@@ -86,6 +87,6 @@ namespace CEGUI
 		void constructor_impl(Urho3D::RenderSurface& target);
 		void initialiseShaders();
 		void cleanupShaders();
-		Urho3DRenderer_impl* d_pimpl;
+		Urho3D::Graphics* d_graphics{ nullptr };
 	};
 }

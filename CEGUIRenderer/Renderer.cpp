@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "Urho3D/Math/Matrix4.h"
+#include "Urho3D/Graphics/RenderSurface.h"
 
 #include "GeometryBuffer.h"
 #include "TextureTarget.h"
@@ -70,7 +71,7 @@ namespace CEGUI
 		//! OGRE root object ptr
 		//Ogre::Root* d_ogreRoot;
 		//! Pointer to the render system for Ogre.
-		Urho3D::Renderer* d_renderSystem;
+		Urho3D::Graphics* d_renderSystem;
 #if !defined(CEGUI_USE_OGRE_COMPOSITOR2)
 		//! Pointer to the previous viewport set in render system.
 		Urho3D::Viewport* d_previousVP;
@@ -137,7 +138,7 @@ namespace CEGUI
 		Urho3DShaderWrapper* d_colouredShaderWrapper;
 	};
 
-	Urho3DRenderer& Urho3DRenderer::bootstrapSystem(const int abi)
+	Urho3DRenderer& Urho3DRenderer::bootstrapSystem(Urho3D::Graphics* graphics, const int abi)
 	{
 		System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
 
@@ -148,7 +149,7 @@ namespace CEGUI
 		createOgreCompositorResources();
 #endif
 
-		Urho3DRenderer& renderer = create();
+		Urho3DRenderer& renderer = create(graphics);
 		Urho3DResourceProvider& rp = createUrho3DResourceProvider();
 		Urho3DImageCodec& ic = createUrho3DImageCodec();
 		System::create(renderer, &rp, static_cast<XMLParser*>(0), &ic);
@@ -157,7 +158,7 @@ namespace CEGUI
 	}
 
 	//----------------------------------------------------------------------------//
-	Urho3DRenderer& Urho3DRenderer::bootstrapSystem(Urho3D::RenderSurface& target, const int abi)
+	Urho3DRenderer& Urho3DRenderer::bootstrapSystem(Urho3D::Graphics* graphics, Urho3D::RenderSurface& target, const int abi)
 	{
 		System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
 
@@ -168,7 +169,7 @@ namespace CEGUI
 		createOgreCompositorResources();
 #endif
 
-		Urho3DRenderer& renderer = Urho3DRenderer::create(target);
+		Urho3DRenderer& renderer = Urho3DRenderer::create(graphics, target);
 		Urho3DResourceProvider& rp = createUrho3DResourceProvider();
 		Urho3DImageCodec& ic = createUrho3DImageCodec();
 		System::create(renderer, &rp, static_cast<XMLParser*>(0), &ic);
@@ -195,19 +196,19 @@ namespace CEGUI
 	}
 
 	//----------------------------------------------------------------------------//
-	Urho3DRenderer& Urho3DRenderer::create(const int abi)
+	Urho3DRenderer& Urho3DRenderer::create(Urho3D::Graphics* graphics, const int abi)
 	{
 		System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
 
-		return *new Urho3DRenderer();
+		return *new Urho3DRenderer(graphics);
 	}
 
 	//----------------------------------------------------------------------------//
-	Urho3DRenderer& Urho3DRenderer::create(Urho3D::RenderSurface& target, const int abi)
+	Urho3DRenderer& Urho3DRenderer::create(Urho3D::Graphics* graphics, Urho3D::RenderSurface& target, const int abi)
 	{
 		System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
 
-		return *new Urho3DRenderer(target);
+		return *new Urho3DRenderer(graphics, target);
 	}
 
 	//----------------------------------------------------------------------------//
@@ -420,7 +421,7 @@ namespace CEGUI
 	{
 		throwIfNameExists(name);
 
-		OgreTexture* t = new OgreTexture(name, tex, take_ownership);
+		Urho3DTexture* t = new Urho3DTexture(name, tex, take_ownership);
 		d_pimpl->d_textures[name] = t;
 
 		logTextureCreation(name);
@@ -444,13 +445,13 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DRenderer::destroyTexture(const String& name)
 	{
-		TextureMap::iterator i = d_textures.find(name);
+		TextureMap::iterator i = d_pimpl->d_textures.find(name);
 
-		if (d_textures.end() != i)
+		if (d_pimpl->d_textures.end() != i)
 		{
 			logTextureDestruction(name);
 			delete i->second;
-			d_textures.erase(i);
+			d_pimpl->d_textures.erase(i);
 		}
 	}
 
@@ -465,18 +466,17 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DRenderer::destroyAllTextures()
 	{
-		while (!d_textures.empty())
-			destroyTexture(d_textures.begin()->first);
+		while (!d_pimpl->d_textures.empty())
+			destroyTexture(d_pimpl->d_textures.begin()->first);
 	}
 
 	//----------------------------------------------------------------------------//
 	Texture& Urho3DRenderer::getTexture(const String& name) const
 	{
-		TextureMap::const_iterator i = d_textures.find(name);
+		TextureMap::const_iterator i = d_pimpl->d_textures.find(name);
 
-		if (i == d_textures.end())
-			throw UnknownObjectException(
-				"No texture named '" + name + "' is available.");
+		if (i == d_pimpl->d_textures.end())
+			throw UnknownObjectException("No texture named '" + name + "' is available.");
 
 		return *i->second;
 	}
@@ -484,42 +484,42 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	bool Urho3DRenderer::isTextureDefined(const String& name) const
 	{
-		return d_textures.find(name) != d_textures.end();
+		return d_pimpl->d_textures.find(name) != d_pimpl->d_textures.end();
 	}
 
 	//----------------------------------------------------------------------------//
 	const Sizef& Urho3DRenderer::getDisplaySize() const
 	{
-		return d_displaySize;
+		return d_pimpl->d_displaySize;
 	}
 	//----------------------------------------------------------------------------//
 	unsigned int Urho3DRenderer::getMaxTextureSize() const
 	{
-		return d_maxTextureSize;
+		return d_pimpl->d_maxTextureSize;
 	}
 
 	//----------------------------------------------------------------------------//
 	const String& Urho3DRenderer::getIdentifierString() const
 	{
-		return d_rendererID;
+		return d_pimpl->d_rendererID;
 	}
 
 	//----------------------------------------------------------------------------//
-	Texture& Urho3DRenderer::createTexture(const String& name, GLuint tex,
-		const Sizef& sz)
-	{
-		if (d_textures.find(name) != d_textures.end())
-			throw AlreadyExistsException(
-				"A texture named '" + name + "' already exists.");
-
-		OpenGLTexture* t = createTexture_impl(name);
-		t->initialise(tex, sz);
-		d_textures[name] = t;
-
-		logTextureCreation(name);
-
-		return *t;
-	}
+// 	Texture& Urho3DRenderer::createTexture(const String& name, GLuint tex,
+// 		const Sizef& sz)
+// 	{
+// 		if (d_textures.find(name) != d_textures.end())
+// 			throw AlreadyExistsException(
+// 				"A texture named '" + name + "' already exists.");
+// 
+// 		OpenGLTexture* t = createTexture_impl(name);
+// 		t->initialise(tex, sz);
+// 		d_textures[name] = t;
+// 
+// 		logTextureCreation(name);
+// 
+// 		return *t;
+// 	}
 
 	//----------------------------------------------------------------------------//
 	void Urho3DRenderer::setDisplaySize(const Sizef& sz)
@@ -631,8 +631,8 @@ namespace CEGUI
 	{
 		d_pimpl->d_renderSystem = d_pimpl->d_ogreRoot->getRenderSystem();
 
-		d_pimpl->d_displaySize.d_width = static_cast<float>(target.getWidth());
-		d_pimpl->d_displaySize.d_height = static_cast<float>(target.getHeight());
+		d_pimpl->d_displaySize.d_width = static_cast<float>(target.GetWidth());
+		d_pimpl->d_displaySize.d_height = static_cast<float>(target.GetHeight());
 
 		//! Checking if OpenGL > 3.2 supported
 		if (d_pimpl->d_renderSystem->getName().find("OpenGL 3+") != Ogre::String::npos)
@@ -641,8 +641,7 @@ namespace CEGUI
 		}
 
 		// create default target & rendering root (surface) that uses it
-		d_pimpl->d_defaultTarget =
-			new Urho3DWindowTarget(*this, *d_pimpl->d_renderSystem, target);
+		d_pimpl->d_defaultTarget = new Urho3DWindowTarget(*this, *d_pimpl->d_renderSystem, target);
 
 #ifndef CEGUI_USE_OGRE_HLMS
 #if OGRE_VERSION >= 0x10800
@@ -700,7 +699,7 @@ namespace CEGUI
 		d_pimpl->d_vbPool.clear();
 	}
 
-	Urho3DRenderer::Urho3DRenderer()
+	Urho3DRenderer::Urho3DRenderer(Urho3D::Graphics* graphics)
 		: d_pimpl(new Urho3DRenderer_impl())
 	{
 		checkOgreInitialised();
@@ -717,7 +716,7 @@ namespace CEGUI
 	}
 
 	//----------------------------------------------------------------------------//
-	Urho3DRenderer::Urho3DRenderer(Urho3D::RenderSurface& target) :
+	Urho3DRenderer::Urho3DRenderer(Urho3D::Graphics* graphics, Urho3D::RenderSurface& target) :
 		d_pimpl(new Urho3DRenderer_impl())
 	{
 		checkOgreInitialised();

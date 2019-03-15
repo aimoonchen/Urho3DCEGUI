@@ -9,7 +9,7 @@ namespace CEGUI
 
 	//----------------------------------------------------------------------------//
 	Urho3DTextureTarget::Urho3DTextureTarget(Urho3DRenderer& owner,
-		Urho3D::Renderer& rs,
+		Urho3D::Graphics& rs,
 		bool addStencilBuffer) :
 		Urho3DRenderTarget(owner, rs),
 		TextureTarget(addStencilBuffer),

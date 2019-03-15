@@ -24,7 +24,7 @@ namespace CEGUI
 			MT_INVALID
 		};
 
-		Urho3DGeometryBuffer(Urho3DRenderer& owner, Urho3D::Renderer& rs, CEGUI::RefCounted<RenderMaterial> renderMaterial);
+		Urho3DGeometryBuffer(Urho3DRenderer& owner, Urho3D::Graphics& rs, CEGUI::RefCounted<RenderMaterial> renderMaterial);
 		virtual ~Urho3DGeometryBuffer();
 
 		// Overrides of virtual and abstract methods from GeometryBuffer
@@ -38,7 +38,7 @@ namespace CEGUI
 		void updateMatrix() const;
 
 		Urho3DRenderer& d_owner;
-		Urho3D::Renderer& d_renderSystem;
+		Urho3D::Graphics& d_renderSystem;
 		//! model matrix cache
 		mutable glm::mat4 d_matrix;
 

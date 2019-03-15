@@ -6,7 +6,7 @@
 namespace CEGUI
 {
 	Urho3DGeometryBuffer::Urho3DGeometryBuffer(Urho3DRenderer& owner,
-		Urho3D::Renderer& rs, CEGUI::RefCounted<RenderMaterial> renderMaterial) :
+		Urho3D::Graphics& rs, CEGUI::RefCounted<RenderMaterial> renderMaterial) :
 		GeometryBuffer(renderMaterial),
 		d_owner(owner),
 		d_renderSystem(rs),

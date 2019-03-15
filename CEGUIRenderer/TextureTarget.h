@@ -16,7 +16,7 @@ namespace CEGUI
 	{
 	public:
 		//! Constructor.
-		Urho3DTextureTarget(Urho3DRenderer& owner, Urho3D::Renderer& rs, bool addStencilBuffer);
+		Urho3DTextureTarget(Urho3DRenderer& owner, Urho3D::Graphics& rs, bool addStencilBuffer);
 		//! Destructor.
 		virtual ~Urho3DTextureTarget();
 

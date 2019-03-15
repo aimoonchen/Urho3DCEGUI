@@ -16,7 +16,7 @@ namespace CEGUI
 	{
 	public:
 		//! Constructor
-		Urho3DRenderTarget(Urho3DRenderer& owner, Urho3D::Renderer& rs);
+		Urho3DRenderTarget(Urho3DRenderer& owner, Urho3D::Graphics& rs);
 
 		//! Destructor
 		virtual ~Urho3DRenderTarget();
@@ -54,7 +54,7 @@ namespace CEGUI
 		//! Urho3DRenderer object that owns this RenderTarget
 		Urho3DRenderer& d_owner;
 		//! Urho3D RendererSystem used to affect the rendering process
-		Urho3D::Renderer& d_renderSystem;
+		Urho3D::Graphics& d_renderSystem;
 		//! Urho3D render target that we are effectively wrapping
 		Urho3D::RenderSurface* d_renderTarget{ nullptr };
 

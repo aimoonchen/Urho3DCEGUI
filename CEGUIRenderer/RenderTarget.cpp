@@ -8,7 +8,7 @@
 
 namespace CEGUI
 {
-	Urho3DRenderTarget::Urho3DRenderTarget(Urho3DRenderer& owner, Urho3D::Renderer& rs)
+	Urho3DRenderTarget::Urho3DRenderTarget(Urho3DRenderer& owner, Urho3D::Graphics& rs)
 		: d_owner{ owner }, d_renderSystem{ rs }
 	{
 	}
