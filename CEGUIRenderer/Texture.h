@@ -15,9 +15,9 @@ namespace CEGUI
 	{
 	public:
 		//! Set the underlying Ogre texture.
-		void setUrho3DTexture(Urho3D::SharedPtr<Urho3D::Texture> texture, bool take_ownership = false);
+		void setUrho3DTexture(const Urho3D::SharedPtr<Urho3D::Texture2D>& texture, bool take_ownership = false);
 		//! Return Ogre::TexturePtr for the underlying Ogre texture.
-		Urho3D::SharedPtr<Urho3D::Texture> getUrho3DTexture() const;
+		Urho3D::SharedPtr<Urho3D::Texture2D> getUrho3DTexture() const;
 
 		//! return a Ogre::string containing a unique name.
 		static Urho3D::String getUniqueName();
@@ -44,7 +44,7 @@ namespace CEGUI
 		friend Texture& Urho3DRenderer::createTexture(const String&);
 		friend Texture& Urho3DRenderer::createTexture(const String&, const String&, const String&);
 		friend Texture& Urho3DRenderer::createTexture(const String&, const Sizef&);
-		friend Texture& Urho3DRenderer::createTexture(const String&, Urho3D::SharedPtr<Urho3D::Texture>&, bool);
+		friend Texture& Urho3DRenderer::createTexture(const String&, Urho3D::SharedPtr<Urho3D::Texture2D>&, bool);
 		friend void Urho3DRenderer::destroyTexture(Texture&);
 		friend void Urho3DRenderer::destroyTexture(const String&);
 
@@ -56,7 +56,7 @@ namespace CEGUI
 		//! construct texture with a specified initial size.
 		Urho3DTexture(const String& name, const Sizef& sz);
 		//! construct texture from existing Ogre texture.
-		Urho3DTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture>& tex, bool take_ownership);
+		Urho3DTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture2D>& tex, bool take_ownership);
 
 
 		//! destructor.

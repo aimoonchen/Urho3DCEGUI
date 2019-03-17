@@ -99,7 +99,7 @@ namespace CEGUI
 	}
 
 	//----------------------------------------------------------------------------//
-	Urho3DTexture::Urho3DTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture>& tex,
+	Urho3DTexture::Urho3DTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture2D>& tex,
 		bool take_ownership) :
 		d_isLinked(false),
 		d_size(0, 0),
@@ -179,19 +179,18 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DTexture::loadFromMemory(const void* buffer, const Sizef& buffer_size, PixelFormat pixel_format)
 	{
-// 		using namespace Urho3D;
-// 
-// 		if (!isPixelFormatSupported(pixel_format))
-// 			throw InvalidRequestException(
-// 				"Data was supplied in an unsupported pixel format.");
-// 
-// 		const size_t byte_size = calculateDataSize(buffer_size, pixel_format);
-// 
-// 		char* bufferCopy = new char[byte_size];
-// 		memcpy(bufferCopy, buffer, byte_size);
-// 
+		using namespace Urho3D;
+
+		if (!isPixelFormatSupported(pixel_format))
+			throw InvalidRequestException("Data was supplied in an unsupported pixel format.");
+
+		const size_t byte_size = calculateDataSize(buffer_size, pixel_format);
+
+		char* bufferCopy = new char[byte_size];
+		memcpy(bufferCopy, buffer, byte_size);
+
 // 		const Ogre::PixelBox* pixelBox = new Ogre::PixelBox(static_cast<std::uint32_t>(buffer_size.d_width), static_cast<std::uint32_t>(buffer_size.d_height),
-// 			1, toOgrePixelFormat(pixel_format), bufferCopy);
+// 			1, toUrho3DPixelFormat(pixel_format), bufferCopy);
 // 		createEmptyOgreTexture(pixel_format);
 // 		d_texture->freeInternalResources();
 // 		d_texture->setWidth(static_cast<std::uint32_t>(buffer_size.d_width));
@@ -199,16 +198,20 @@ namespace CEGUI
 // 		d_texture->setDepth(1);
 // 		d_texture->createInternalResources();
 // 		d_texture->getBuffer(0, 0).get()->blitFromMemory(*pixelBox);
-// 
-// 		// throw exception if no texture was able to be created
-// 		if (d_texture.isNull())
-// 			throw RendererException(
-// 				"Failed to blit to Texture from memory.");
-// 
-// 		d_size.d_width = static_cast<float>(d_texture->getWidth());
-// 		d_size.d_height = static_cast<float>(d_texture->getHeight());
-// 		d_dataSize = buffer_size;
-// 		updateCachedScaleValues();
+
+		static const auto& context = g_graphics->GetContext();
+		d_texture = new Urho3D::Texture2D(context);
+		d_texture->SetSize(static_cast<std::int32_t>(buffer_size.d_width), static_cast<std::int32_t>(buffer_size.d_height), toUrho3DPixelFormat(pixel_format));
+		d_texture->SetData(0, 0, 0, static_cast<std::int32_t>(buffer_size.d_width), static_cast<std::int32_t>(buffer_size.d_height), bufferCopy);
+
+		// throw exception if no texture was able to be created
+		if (d_texture.Null())
+			throw RendererException("Failed to blit to Texture from memory.");
+		
+		d_size.d_width = static_cast<float>(d_texture->GetWidth());
+		d_size.d_height = static_cast<float>(d_texture->GetHeight());
+		d_dataSize = buffer_size;
+		updateCachedScaleValues();
 	}
 
 	//----------------------------------------------------------------------------//
@@ -302,7 +305,7 @@ namespace CEGUI
 	}
 
 	//----------------------------------------------------------------------------//
-	void Urho3DTexture::setUrho3DTexture(Urho3D::SharedPtr<Urho3D::Texture> texture, bool take_ownership)
+	void Urho3DTexture::setUrho3DTexture(const Urho3D::SharedPtr<Urho3D::Texture2D>& texture, bool take_ownership)
 	{
 		freeUrho3DTexture();
 
@@ -321,7 +324,7 @@ namespace CEGUI
 	}
 
 	//----------------------------------------------------------------------------//
-	Urho3D::SharedPtr<Urho3D::Texture> Urho3DTexture::getUrho3DTexture() const
+	Urho3D::SharedPtr<Urho3D::Texture2D> Urho3DTexture::getUrho3DTexture() const
 	{
 		return d_texture;
 	}

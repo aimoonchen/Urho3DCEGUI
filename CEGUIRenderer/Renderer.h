@@ -10,7 +10,7 @@ namespace Urho3D
 {
 	class RenderSurface;
 	class Matrix4;
-	class Texture;
+	class Texture2D;
 	class Graphics;
 }
 
@@ -59,7 +59,7 @@ namespace CEGUI
 		Texture& createTexture(const String& name) override;
 		Texture& createTexture(const String& name, const String& filename, const String& resourceGroup) override;
 		Texture& createTexture(const String& name, const Sizef& size) override;
-		Texture& createTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture>& tex, bool take_ownership = false);
+		Texture& createTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture2D>& tex, bool take_ownership = false);
 		void destroyTexture(Texture& texture) override;
 		void destroyTexture(const String& name) override;
 		void destroyAllTextures() override;

@@ -417,7 +417,7 @@ namespace CEGUI
 		return *t;
 	}
 
-	Texture& Urho3DRenderer::createTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture>& tex, bool take_ownership)
+	Texture& Urho3DRenderer::createTexture(const String& name, Urho3D::SharedPtr<Urho3D::Texture2D>& tex, bool take_ownership)
 	{
 		throwIfNameExists(name);
 
