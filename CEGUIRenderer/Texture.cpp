@@ -4,10 +4,14 @@
 #include "ImageCodec.h"
 
 #include "Urho3D/Container/Str.h"
+#include "Urho3D/Core/Context.h"
+#include "Urho3D/Resource/ResourceCache.h"
 #include "Urho3D/Graphics/Texture2D.h"
 #include "Urho3D/Graphics/Graphics.h"
 
 #include <cstdint>
+
+#include "ResourceProvider.h"
 
 namespace CEGUI
 {
@@ -146,34 +150,41 @@ namespace CEGUI
 		// get and check existence of CEGUI::System object
 		System* sys = System::getSingletonPtr();
 		if (!sys)
-			throw RendererException(
-				"CEGUI::System object has not been created!");
+			throw RendererException("CEGUI::System object has not been created!");
+		
+		static const auto& context = g_graphics->GetContext();
+		auto* cache = context->GetSubsystem<Urho3D::ResourceCache>();
+		auto rp = static_cast<Urho3DResourceProvider*>(sys->getResourceProvider());
+		String final_filename{ rp->getFilePath(filename, resourceGroup) };
+		auto utf8_str = String::convertUtf32ToUtf8(final_filename.c_str());
 
-		// load file to memory via resource provider
-		RawDataContainer texFile;
-		sys->getResourceProvider()->loadRawDataContainer(filename, texFile,
-			resourceGroup);
+		auto tex_ptr = cache->GetResource<Urho3D::Texture2D>(utf8_str.c_str());
+		setUrho3DTexture(Urho3D::SharedPtr<Urho3D::Texture2D>{ tex_ptr }, true);
 
-		ImageCodec& ic(sys->getImageCodec());
-
-		// if we're using the integrated Urho3D codec, set the file-type hint string
-		if (ic.getIdentifierString().substr(0, 14) == "Urho3DImageCodec")
-		{
-			String type;
-			String::size_type i = filename.find_last_of(".");
-			if (i != String::npos && filename.length() - i > 1)
-				type = filename.substr(i + 1);
-			static_cast<Urho3DImageCodec&>(ic).setImageFileDataType(type);
-		}
-
-		Texture* res = sys->getImageCodec().load(texFile, this);
-
-		// unload file data buffer
-		sys->getResourceProvider()->unloadRawDataContainer(texFile);
-
-		// throw exception if data was load loaded to texture.
-		if (!res)
-			throw RendererException(sys->getImageCodec().getIdentifierString() + " failed to load image '" + filename + "'.");
+// 		// load file to memory via resource provider
+// 		RawDataContainer texFile;
+// 		sys->getResourceProvider()->loadRawDataContainer(filename, texFile,	resourceGroup);
+// 
+// 		ImageCodec& ic(sys->getImageCodec());
+// 
+// 		// if we're using the integrated Urho3D codec, set the file-type hint string
+// 		if (ic.getIdentifierString().substr(0, 14) == "Urho3DImageCodec")
+// 		{
+// 			String type;
+// 			String::size_type i = filename.find_last_of(".");
+// 			if (i != String::npos && filename.length() - i > 1)
+// 				type = filename.substr(i + 1);
+// 			static_cast<Urho3DImageCodec&>(ic).setImageFileDataType(type);
+// 		}
+// 
+// 		Texture* res = sys->getImageCodec().load(texFile, this);
+// 
+// 		// unload file data buffer
+// 		sys->getResourceProvider()->unloadRawDataContainer(texFile);
+// 
+// 		// throw exception if data was load loaded to texture.
+// 		if (!res)
+// 			throw RendererException(sys->getImageCodec().getIdentifierString() + " failed to load image '" + filename + "'.");
 	}
 
 	//----------------------------------------------------------------------------//

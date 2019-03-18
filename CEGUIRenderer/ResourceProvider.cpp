@@ -11,6 +11,13 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DResourceProvider::loadRawDataContainer(const String& filename, RawDataContainer& output, const String& resourceGroup)
 	{
+		String final_filename(getFinalFilename(filename, resourceGroup));
+
+		unsigned char* mem = new unsigned char[memBuffSize];
+		memcpy(mem, buf.c_str(), memBuffSize);
+
+		output.setData(mem);
+		output.setSize(memBuffSize);
 // 		String orpGroup;
 // 		if (resourceGroup.empty())
 // 			orpGroup = d_defaultResourceGroup.empty() ?
@@ -82,5 +89,10 @@ namespace CEGUI
 // 		}
 // 
 // 		return entries;
+	}
+
+	String Urho3DResourceProvider::getFilePath(const String& filename, const String& resourceGroup)
+	{
+		return getFinalFilename(filename, resourceGroup);
 	}
 }
