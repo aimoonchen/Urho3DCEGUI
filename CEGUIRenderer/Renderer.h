@@ -5,6 +5,8 @@
 
 #include "Urho3D/Urho3D.h"
 #include "Urho3D/Container/Ptr.h"
+#include <vector>
+#include <unordered_map>
 
 namespace Urho3D
 {
@@ -21,7 +23,7 @@ namespace CEGUI
 	class Urho3DResourceProvider;
 	class Urho3DImageCodec;
 	class Urho3DWindowTarget;
-	struct Urho3DRenderer_impl;
+	class Urho3DShaderWrapper;
 
 	class URHO3D_API Urho3DRenderer : public Renderer
 	{
@@ -80,13 +82,33 @@ namespace CEGUI
 		Urho3DRenderer(Urho3D::Graphics* graphics, Urho3D::RenderSurface& target);
 		//! destructor.
 		virtual ~Urho3DRenderer();
-		void checkOgreInitialised();
+		void checkUrho3DInitialised();
 		void throwIfNameExists(const String& name) const;
 		static void logTextureCreation(const String& name);
 		static void logTextureDestruction(const String& name);
-		void constructor_impl(Urho3D::RenderSurface& target);
+		void constructor_impl(/*Urho3D::RenderSurface& target*/);
 		void initialiseShaders();
 		void cleanupShaders();
 		Urho3D::Graphics* d_graphics{ nullptr };
+		//! String holding the renderer identification text.
+		static String d_rendererID;
+		//! What the renderer considers to be the current display size.
+		Sizef d_displaySize;
+		//! The default RenderTarget
+		RenderTarget* d_defaultTarget;
+		using TextureTargetList = std::vector<TextureTarget*>;
+		using GeometryBufferList = std::vector<Urho3DGeometryBuffer*>;
+		using TextureMap = std::unordered_map<String, Urho3DTexture*>;
+		//! Container used to track texture targets.
+		TextureTargetList d_textureTargets;
+		//! Container used to track geometry buffers.
+		GeometryBufferList d_geometryBuffers;
+		//! Container used to track textures.
+		TextureMap d_textures;
+		//! What the renderer thinks the max texture size is.
+		unsigned int d_maxTextureSize;
+		BlendMode d_activeBlendMode;
+		Urho3DShaderWrapper* d_texturedShaderWrapper;
+		Urho3DShaderWrapper* d_colouredShaderWrapper;
 	};
 }

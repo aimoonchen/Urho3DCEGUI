@@ -13,11 +13,11 @@ namespace CEGUI
 	{
 		String final_filename(getFinalFilename(filename, resourceGroup));
 
-		unsigned char* mem = new unsigned char[memBuffSize];
-		memcpy(mem, buf.c_str(), memBuffSize);
-
-		output.setData(mem);
-		output.setSize(memBuffSize);
+// 		unsigned char* mem = new unsigned char[memBuffSize];
+// 		memcpy(mem, buf.c_str(), memBuffSize);
+// 
+// 		output.setData(mem);
+// 		output.setSize(memBuffSize);
 // 		String orpGroup;
 // 		if (resourceGroup.empty())
 // 			orpGroup = d_defaultResourceGroup.empty() ?

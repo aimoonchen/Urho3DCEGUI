@@ -3,10 +3,10 @@
 
 namespace CEGUI
 {
-	Urho3DWindowTarget::Urho3DWindowTarget(Urho3DRenderer& owner, Urho3D::Graphics& rs, Urho3D::RenderSurface& target)
+	Urho3DWindowTarget::Urho3DWindowTarget(Urho3DRenderer& owner, Urho3D::Graphics& rs/*, Urho3D::RenderSurface& target*/)
 		: Urho3DRenderTarget(owner, rs)
 	{
-		initRenderTarget(target);
+		initRenderTarget(/*target*/);
 	}
 
 	Urho3DWindowTarget::~Urho3DWindowTarget()
@@ -20,7 +20,7 @@ namespace CEGUI
 		d_viewport = 0;
 		d_viewportValid = false;
 
-		initRenderTarget(target);
+		initRenderTarget(/*target*/);
 	}
 
 	bool Urho3DWindowTarget::isImageryCache() const
@@ -28,9 +28,9 @@ namespace CEGUI
 		return false;
 	}
 
-	void Urho3DWindowTarget::initRenderTarget(Urho3D::RenderSurface& target)
+	void Urho3DWindowTarget::initRenderTarget(/*Urho3D::RenderSurface& target*/)
 	{
-		d_renderTarget = &target;
+		//d_renderTarget = &target;
 
 		Rectf init_area(glm::vec2(0.0f, 0.0f),
 			Sizef(static_cast<float>(d_renderTarget->GetWidth()),

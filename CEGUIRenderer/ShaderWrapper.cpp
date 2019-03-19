@@ -1,9 +1,17 @@
 #include "ShaderWrapper.h"
+#include "CEGUI/ShaderParameterBindings.h"
+#include "CEGUI/Exceptions.h"
+#include "Urho3D/Core/Context.h"
+#include "Urho3D/Core/Timer.h"
+#include "Urho3D/Graphics/Graphics.h"
+#include "Urho3D/Graphics/Texture2D.h"
+#include "Texture.h"
 
 namespace CEGUI
 {
 	Urho3DShaderWrapper::Urho3DShaderWrapper(Urho3DRenderer& owner, Urho3D::Graphics& rs,
-		Urho3D::SharedPtr<Urho3D::ShaderVariation> vs, Urho3D::SharedPtr<Urho3D::ShaderVariation> ps)
+		Urho3D::ShaderVariation* vs, Urho3D::ShaderVariation* ps)
+		: d_owner{ owner }, d_graphics{ rs }, d_vertexShader{ vs }, d_pixelShader{ ps }
 	{
 
 	}
@@ -15,116 +23,71 @@ namespace CEGUI
 
 	void Urho3DShaderWrapper::prepareForRendering(const ShaderParameterBindings* shaderParameterBindings)
 	{
-// #ifdef CEGUI_USE_OGRE_HLMS
-// 		d_owner.setGPUPrograms(d_vertexShader, d_pixelShader);
-// #else
-// 		Ogre::GpuProgram* vs = d_vertexShader->_getBindingDelegate();
-// 		d_renderSystem.bindGpuProgram(vs);
-// 
-// 		Ogre::GpuProgram* ps = d_pixelShader->_getBindingDelegate();
-// 		d_renderSystem.bindGpuProgram(ps);
-// #endif //CEGUI_USE_OGRE_HLMS
-// 
-// 		const ShaderParameterBindings::ShaderParameterBindingsMap&
-// 			shader_parameter_bindings = shaderParameterBindings->
-// 			getShaderParameterBindings();
-// 
-// 		ShaderParameterBindings::ShaderParameterBindingsMap::const_iterator iter =
-// 			shader_parameter_bindings.begin();
-// 		ShaderParameterBindings::ShaderParameterBindingsMap::const_iterator end =
-// 			shader_parameter_bindings.end();
-// 
-// 		for (; iter != end; ++iter)
-// 		{
-// 			const CEGUI::ShaderParameter* parameter = iter->second;
-// 			const ShaderParamType parameterType = parameter->getType();
-// 
-// 			std::map<int, size_t>::const_iterator find_iter = d_paramTypeToIndex.
-// 				find(static_cast<int>(parameterType));
-// 
-// 			if (find_iter == d_paramTypeToIndex.end())
-// 			{
-// 				std::string errorMessage = std::string("Unknown variable name: \"") +
-// 					iter->first + "\"";
-// 				throw RendererException(errorMessage);
-// 			}
-// 
-// 			size_t target_index = find_iter->second;
-// 
-// 			switch (parameterType)
-// 			{
-// 			case ShaderParamType::Texture:
-// 			{
-// 				const CEGUI::ShaderParameterTexture* parameterTexture =
-// 					static_cast<const CEGUI::ShaderParameterTexture*>(parameter);
-// 
-// 				const CEGUI::OgreTexture* texture = static_cast<const
-// 					CEGUI::OgreTexture*>(parameterTexture->d_parameterValue);
-// 
-// 				Ogre::TexturePtr actual_texture = texture->getOgreTexture();
-// 
-// 				if (actual_texture.isNull())
-// 				{
-// 					throw RendererException("Ogre texture ptr is empty");
-// 				}
-// 
-// #ifdef CEGUI_USE_OGRE_HLMS
-// 				d_renderSystem._setTexture(0, true, actual_texture.get());
-// #else
-// 				d_renderSystem._setTexture(0, true, actual_texture);
-// #endif //CEGUI_USE_OGRE_HLMS
-// 
-// 				d_owner.initialiseTextureStates();
-// 
-// 				break;
-// 			}
-// 			case ShaderParamType::Matrix4X4:
-// 			{
-// 				// This is the "modelViewProjMatrix"
-// 				const CEGUI::ShaderParameterMatrix* mat = static_cast<const
-// 					CEGUI::ShaderParameterMatrix*>(parameter);
-// 
-// 				if (d_lastMatrix != mat->d_parameterValue)
-// 				{
-// 					d_vertexParameters->_writeRawConstants(target_index,
-// 						glm::value_ptr(mat->d_parameterValue),
-// 						16);
-// 					d_lastMatrix = mat->d_parameterValue;
-// 				}
-// 				break;
-// 			}
-// 			case ShaderParamType::Float:
-// 			{
-// 				// This is the alpha value
-// 				const CEGUI::ShaderParameterFloat* new_alpha = static_cast<const
-// 					CEGUI::ShaderParameterFloat*>(parameter);
-// 
-// 				if (d_previousAlpha != new_alpha->d_parameterValue)
-// 				{
-// 					d_previousAlpha = new_alpha->d_parameterValue;
-// 
-// 					d_pixelParameters->_writeRawConstants(target_index,
-// 						&d_previousAlpha, 1);
-// 				}
-// 
-// 				break;
-// 			}
-// 			default:
-// 				throw RendererException("Invalid parameter type");
-// 			}
-// 		}
-// #ifdef CEGUI_USE_OGRE_HLMS
-// 
-// 		// The PSO needs to be bound before we can bind shader parameters
-// 		d_owner.bindPSO(d_renderOp);
-// 
-// #endif //CEGUI_USE_OGRE_HLMS
-// 
-// 
-// 		// Pass the finalized parameters to Ogre
-// 		d_renderSystem.bindGpuProgramParameters(Ogre::GPT_VERTEX_PROGRAM,
-// 			d_vertexParameters, Ogre::GPV_ALL);
-// 		d_renderSystem.bindGpuProgramParameters(Ogre::GPT_FRAGMENT_PROGRAM,
-// 			d_pixelParameters, Ogre::GPV_ALL);
+		static const auto& context = d_graphics.GetContext();
+		d_graphics.SetShaders(d_vertexShader, d_pixelShader);
+		const auto& shader_parameter_bindings = shaderParameterBindings->getShaderParameterBindings();
+		auto iter = shader_parameter_bindings.begin();
+		auto end = shader_parameter_bindings.end();
+
+		while (iter != end) {
+			const CEGUI::ShaderParameter* parameter = iter->second;
+			if (parameter->getType() != ShaderParamType::Texture) {
+				auto found_iterator = d_shaderParameterStates.find(iter->first);
+				if (found_iterator != d_shaderParameterStates.end()) {
+					ShaderParameter* last_shader_parameter = found_iterator->second;
+					if (parameter->equal(last_shader_parameter)) {
+						++iter;
+						continue;
+					} else {
+						if (parameter->getType() == last_shader_parameter->getType()) {
+							last_shader_parameter->takeOverParameterValue(parameter);
+						} else {
+							delete found_iterator->second;
+							found_iterator->second = parameter->clone();
+						}
+					}
+				} else {
+					d_shaderParameterStates[iter->first] = parameter->clone();
+				}
+			}
+
+			//const GLint& location = d_uniformVariables.find(iter->first)->second;
+
+			CEGUI::ShaderParamType parameter_type = parameter->getType();
+
+			switch (parameter_type) {
+			case ShaderParamType::Int: {
+				auto parameterInt = static_cast<const CEGUI::ShaderParameterInt*>(parameter);
+				//glUniform1i(location, parameterInt->d_parameterValue);
+			}
+			break;
+			case ShaderParamType::Float: {
+				auto parameterFloat = static_cast<const CEGUI::ShaderParameterFloat*>(parameter);
+				//glUniform1f(location, parameterFloat->d_parameterValue);
+			}
+			break;
+			case ShaderParamType::Matrix4X4: {
+				auto parameterMatrix = static_cast<const CEGUI::ShaderParameterMatrix*>(parameter);
+				//glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(parameterMatrix->d_parameterValue));
+			}
+			break;
+			case ShaderParamType::Texture: {
+				auto parameterTexture = static_cast<const CEGUI::ShaderParameterTexture*>(parameter);
+				auto urho3DTexture = static_cast<const CEGUI::Urho3DTexture*>(parameterTexture->d_parameterValue);
+				d_graphics.SetTexture(0, urho3DTexture->getUrho3DTexture());
+// 				d_glStateChangeWrapper->activeTexture(location);
+// 				d_glStateChangeWrapper->bindTexture(GL_TEXTURE_2D, urho3DTexture->getOpenGLTexture());
+			}
+			break;
+			default:
+				break;
+			}
+
+			++iter;
+		}
+
+		float elapsedTime = context->GetSubsystem<Urho3D::Time>()->GetElapsedTime();
+		d_graphics.SetShaderParameter(Urho3D::VSP_ELAPSEDTIME, elapsedTime);
+		d_graphics.SetShaderParameter(Urho3D::PSP_ELAPSEDTIME, elapsedTime);
 	}
 }

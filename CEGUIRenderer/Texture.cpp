@@ -6,6 +6,8 @@
 #include "Urho3D/Container/Str.h"
 #include "Urho3D/Core/Context.h"
 #include "Urho3D/Resource/ResourceCache.h"
+#include "Urho3D/IO/MemoryBuffer.h"
+#include "Urho3D/Resource/Image.h"
 #include "Urho3D/Graphics/Texture2D.h"
 #include "Urho3D/Graphics/Graphics.h"
 
@@ -190,15 +192,13 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DTexture::loadFromMemory(const void* buffer, const Sizef& buffer_size, PixelFormat pixel_format)
 	{
-		using namespace Urho3D;
-
 		if (!isPixelFormatSupported(pixel_format))
 			throw InvalidRequestException("Data was supplied in an unsupported pixel format.");
 
 		const size_t byte_size = calculateDataSize(buffer_size, pixel_format);
 
-		char* bufferCopy = new char[byte_size];
-		memcpy(bufferCopy, buffer, byte_size);
+// 		char* bufferCopy = new char[byte_size];
+// 		memcpy(bufferCopy, buffer, byte_size);
 
 // 		const Ogre::PixelBox* pixelBox = new Ogre::PixelBox(static_cast<std::uint32_t>(buffer_size.d_width), static_cast<std::uint32_t>(buffer_size.d_height),
 // 			1, toUrho3DPixelFormat(pixel_format), bufferCopy);
@@ -210,15 +210,21 @@ namespace CEGUI
 // 		d_texture->createInternalResources();
 // 		d_texture->getBuffer(0, 0).get()->blitFromMemory(*pixelBox);
 
-		static const auto& context = g_graphics->GetContext();
-		d_texture = new Urho3D::Texture2D(context);
-		d_texture->SetSize(static_cast<std::int32_t>(buffer_size.d_width), static_cast<std::int32_t>(buffer_size.d_height), toUrho3DPixelFormat(pixel_format));
-		d_texture->SetData(0, 0, 0, static_cast<std::int32_t>(buffer_size.d_width), static_cast<std::int32_t>(buffer_size.d_height), bufferCopy);
+		Urho3D::MemoryBuffer source(buffer, byte_size);
 
+		static const auto& context = g_graphics->GetContext();
+		Urho3D::SharedPtr<Urho3D::Image> loadImage{ new Urho3D::Image(context) };
+		if (!loadImage->Load(source)) {
+			loadImage.Reset();
+			return;
+		}
+
+		d_texture = new Urho3D::Texture2D(context);
 		// throw exception if no texture was able to be created
-		if (d_texture.Null())
+		if (!d_texture->SetData(loadImage)) {
+			d_texture.Reset();
 			throw RendererException("Failed to blit to Texture from memory.");
-		
+		}
 		d_size.d_width = static_cast<float>(d_texture->GetWidth());
 		d_size.d_height = static_cast<float>(d_texture->GetHeight());
 		d_dataSize = buffer_size;

@@ -1,6 +1,9 @@
 #include <Urho3D/Engine/Application.h>
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/Input/InputEvents.h>
+#include <memory>
+#include "CEGuiProxy.h"
+
 using namespace Urho3D;
 class MyApp : public Application
 {
@@ -30,6 +33,19 @@ public:
         int key = eventData[P_KEY].GetInt();
         if (key == KEY_ESCAPE)
             engine_->Exit();
+		
+		CEGUI::Key::Scan ceguiKey = urho3DKeyToCeguiKey(Key(key));
+
+// 		if (eventData[P_BUTTONS].i == GLFW_PRESS)
+// 		{
+// 			d_sampleApp->injectKeyDown(ceguiKey);
+// 		}
+// 		else if (action == GLFW_RELEASE)
+// 		{
+// 			d_sampleApp->injectKeyUp(ceguiKey);
+// 	
     }
+private:
+	std::unique_ptr<CEGuiBaseApplication> cegui_proxy_;
 };
 URHO3D_DEFINE_APPLICATION_MAIN(MyApp)
