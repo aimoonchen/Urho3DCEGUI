@@ -39,7 +39,7 @@
 const char CEGuiBaseApplication::DATAPATH_VAR_NAME[] = "CEGUI_SAMPLE_DATAPATH";
 //SampleBrowserBase* CEGuiBaseApplication::d_sampleApp(nullptr);
 
-CEGUI::Key::Scan urho3DKeyToCeguiKey(Urho3D::Key key)
+CEGUI::Key::Scan urho3DKeyToCeguiKey(unsigned key)
 {
 	switch (key)
 	{

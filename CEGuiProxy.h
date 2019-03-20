@@ -32,7 +32,7 @@ namespace CEGUI
 	class GUIContext;
 }
 
-CEGUI::Key::Scan urho3DKeyToCeguiKey(Urho3D::Key key);
+CEGUI::Key::Scan urho3DKeyToCeguiKey(unsigned key);
 
 /*!
 \brief
@@ -134,11 +134,11 @@ protected:
 	static const char DATAPATH_VAR_NAME[];
 
 	//! The abstract function for destroying the renderer and the window.
-	virtual void destroyWindow() = 0;
+	virtual void destroyWindow() {};// = 0;
 	//! Implementation function to perform required pre-render operations.
-	virtual void beginRendering(const float elapsed) = 0;
+	virtual void beginRendering(const float elapsed) {};// = 0;
 	//! Implementation function to perform required post-render operations.
-	virtual void endRendering() = 0;
+	virtual void endRendering() {};// = 0;
 
 	/*!
 	\brief

@@ -19,6 +19,9 @@
 
 namespace CEGUI
 {
+	Urho3D::Graphics* g_graphics = nullptr;
+	String Urho3DRenderer::d_rendererID;
+
 	Urho3DRenderer& Urho3DRenderer::bootstrapSystem(Urho3D::Graphics* graphics, const int abi)
 	{
 		System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
@@ -80,7 +83,7 @@ namespace CEGUI
 	Urho3DRenderer& Urho3DRenderer::create(Urho3D::Graphics* graphics, const int abi)
 	{
 		System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
-
+		
 		return *new Urho3DRenderer(graphics);
 	}
 
@@ -541,7 +544,7 @@ namespace CEGUI
 	Urho3DRenderer::Urho3DRenderer(Urho3D::Graphics* graphics)
 	{
 		checkUrho3DInitialised();
-
+		g_graphics = graphics;
 // 		// get auto created window
 // 		Ogre::RenderWindow* rwnd = d_pimpl->d_ogreRoot->getAutoCreatedWindow();
 // 		if (!rwnd)
@@ -556,7 +559,7 @@ namespace CEGUI
 	Urho3DRenderer::Urho3DRenderer(Urho3D::Graphics* graphics, Urho3D::RenderSurface& target)
 	{
 		checkUrho3DInitialised();
-
+		g_graphics = graphics;
 		constructor_impl(/*target*/);
 	}
 
